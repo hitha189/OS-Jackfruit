@@ -189,7 +189,7 @@ sudo dmesg | tail -5
 ![alt text](image-9.png)
 ![alt text](image-10.png)
 
-*Two CPU-bound containers running simultaneously with different nice values (`-5` vs `+10`). The high-priority container (cpu-hi) completed in 14.748s while the low-priority container (cpu-lo) took 16.329s on the same 15-second workload, demonstrating the CFS scheduler allocating more CPU time to the lower-nice process.*
+*Two CPU-bound containers running simultaneously with different nice values (-5 vs +10). The high-priority container (cpu-hi) completed in 23.094s while the low-priority container (cpu-lo) took 34.786s on the same 15-second workload, demonstrating the CFS scheduler allocating proportionally more CPU time to the lower-nice process. The 11.692 second difference (~33% faster) reflects the CFS weight ratio of approximately 2.19:1 between nice -5 and nice +10, confirming that the --nice flag successfully influenced scheduling behavior on the VirtualBox VM.*
 
 ---
 
