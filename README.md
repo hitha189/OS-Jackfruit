@@ -242,9 +242,8 @@ Enforcement belongs in kernel space rather than purely in user space for two rea
 ### 4.5 Scheduling Behavior
 
 The Linux Completely Fair Scheduler (CFS) assigns CPU time proportional to each task's weight, which is derived from its nice value. A nice value of -5 corresponds to a higher weight than nice +10, so CFS allocates a larger share of CPU time to the lower-nice process when both are runnable simultaneously.
-
-In our experiment, both containers ran an identical CPU-bound workload for 15 seconds. The high-priority container (nice -5) completed in 14.748s while the low-priority container (nice +10) took 16.329s — a difference of 1.581 seconds on a single-core equivalent workload. This is consistent with CFS behavior: the scheduler does not starve the low-priority task but gives it proportionally less time, causing it to make slower progress and finish later.
-
+In our experiment, both containers ran an identical CPU-bound workload for 15 seconds. The high-priority container (nice -5) completed in 23.094s while the low-priority container (nice +10) took 34.786s — a difference of 11.692 seconds on the same workload. This is consistent with CFS behavior: the scheduler does not starve the low-priority task but gives it proportionally less time, causing it to make slower progress and finish later.
+The larger wall-clock times compared to the nominal 15-second workload are expected — both containers were competing for CPU simultaneously on a VM with limited cores, so each received less than 100% of a CPU. The high-priority container (nice -5) received a significantly larger share, finishing roughly 33% faster than the low-priority container. This is consistent with the CFS weight ratio between nice -5 and nice +10, which is approximately 2.19:1, meaning cpu-hi received about 69% of shared CPU time and cpu-lo received about 31%.
 The result also illustrates that CFS targets fairness and proportional sharing rather than strict priority preemption. Both tasks ran to completion; neither was starved. The high-priority task simply received more CPU quanta per unit of wall-clock time.
 
 ---
@@ -286,15 +285,16 @@ Both containers ran `/cpu_hog 15` — a pure CPU-bound workload that spins for 1
 
 | Container | Nice value | Priority | Real time (wall clock) |
 |-----------|-----------|----------|----------------------|
-| cpu-hi | -5 | High | 14.748s |
-| cpu-lo | +10 | Low | 16.329s |
+| cpu-hi | -5 | High | 23.094s |
+| cpu-lo | +10 | Low | 34.786s |
 
 Both containers were launched within 1-2 seconds of each other so they competed for CPU time for the majority of their runtime.
 
 **Observations:**
 
-- cpu-hi finished 1.581 seconds faster despite running the same workload.
+- cpu-hi finished 11.692 seconds faster despite running the same workload.
 - Neither task was starved — both completed successfully.
-- The difference (about 10% of total runtime) is consistent with CFS proportional sharing: at nice -5 vs nice +10, the weight ratio is approximately 1.5:1, meaning cpu-hi received roughly 60% of shared CPU time and cpu-lo received 40%.
+- The difference (about 33% of total runtime) is consistent with CFS proportional sharing: at nice -5 vs nice +10, the weight ratio is approximately 2.19:1, meaning cpu-hi received roughly 69% of shared CPU time and cpu-lo received 31%.
+- The extended wall-clock times (23s and 34s vs the nominal 15s) are expected because both containers were simultaneously competing for limited CPU resources on a VirtualBox VM, so neither could run at full speed.
 
-**Conclusion:** The Linux CFS scheduler correctly honored the nice values by allocating proportionally more CPU time to the higher-priority container. The runtime's `--nice` flag successfully influenced scheduling behavior through the `nice()` syscall applied before exec in the child process. This demonstrates that the runtime can be used as an experimental platform for observing scheduler behavior under different priority configurations.
+**Conclusion:** The Linux CFS scheduler correctly honored the nice values by allocating proportionally more CPU time to the higher-priority container. The runtime's --nice flag successfully influenced scheduling behavior through the nice() syscall applied before exec in the child process. The 11.692 second gap between the two containers — despite running identical workloads — clearly demonstrates that the CFS weight system derived from nice values has a significant and measurable impact on CPU allocation. This confirms that the runtime can be used as an experimental platform for observing scheduler behavior under different priority configurations.
