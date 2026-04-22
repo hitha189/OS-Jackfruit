@@ -142,56 +142,60 @@ sudo dmesg | tail -5
 ## 3. Demo Screenshots
 
 ### Screenshot 1 — Multi-container supervision
-![alt text](image.png)
 ![alt text](image-1.png)
+![alt text](image-2.png)
+
 *Two containers (alpha and beta) running simultaneously under one supervisor process. Terminal 1 shows the supervisor output with both `started container` lines. Terminal 2 shows the `start` commands and their responses.*
 
 ---
 
 ### Screenshot 2 — Metadata tracking
-![alt text](image-11.png)
+![alt text](image-3.png)
 
 *Output of `sudo ./engine ps` showing both containers in `running` state with their PIDs, start times, and exit codes.*
 
 ---
 
 ### Screenshot 3 — Bounded-buffer logging
-![alt text](image-2.png)
-![alt text](image-3.png)
+![alt text](image-4.png)
+![alt text](image-5.png)
+
 *Contents of `logs/alpha.log` captured through the producer-consumer logging pipeline, showing repeated `hello from alpha` lines. `ls -lh logs/` confirms both log files exist with nonzero sizes.*
 
 ---
 
 ### Screenshot 4 — CLI and IPC
-![alt text](image-4.png)
+![alt text](image-6.png)
+
 *The `run` command issued from the CLI client, blocking until the container exits, then printing the supervisor's response. Demonstrates the UNIX domain socket control channel (Path B) between the CLI process and the supervisor daemon.*
 
 ---
 
 ### Screenshot 5 — Soft-limit warning
-![alt text](image-10.png)
+![alt text](image-7.png)
 
 *`dmesg` output showing the kernel module emitting a soft-limit warning for container `memtest` when its RSS exceeded 20 MiB. The warning includes the container ID, PID, actual RSS, and configured limit.*
 
 ---
 
 ### Screenshot 6 — Hard-limit enforcement
-![alt text](image-9.png)
+![alt text](image-8.png)
 
 *`dmesg` output showing the kernel module sending SIGKILL to `memtest` after its RSS exceeded 40 MiB, followed by `sudo ./engine ps` output showing the container state as `hard_limit_killed` with exit code 137 (128 + SIGKILL).*
 
 ---
 
 ### Screenshot 7 — Scheduling experiment
-![alt text](image-5.png)
-![alt text](image-6.png)
+![alt text](image-9.png)
+![alt text](image-10.png)
+
 *Two CPU-bound containers running simultaneously with different nice values (`-5` vs `+10`). The high-priority container (cpu-hi) completed in 14.748s while the low-priority container (cpu-lo) took 16.329s on the same 15-second workload, demonstrating the CFS scheduler allocating more CPU time to the lower-nice process.*
 
 ---
 
 ### Screenshot 8 — Clean teardown
-![alt text](image-7.png)
-![alt text](image-8.png)
+![alt text](image-11.png)
+![alt text](image-12.png)
 
 *`sudo ./engine ps` showing both containers in `stopped` state after `stop` commands. `ps aux | grep defunct` returns no zombie processes. Terminal 1 shows the supervisor printing `[supervisor] shutting down`, `[logger] consumer thread exiting, flushing done`, and `[supervisor] exited cleanly` on Ctrl+C.*
 
