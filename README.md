@@ -273,7 +273,7 @@ The result also illustrates that CFS targets fairness and proportional sharing r
 ### Scheduling experiments
 **Choice:** Nice values via `setpriority()` (through the `nice()` call in the child before exec) to differentiate CPU allocation.
 **Tradeoff:** Nice values only affect CFS weight, not CPU affinity or real-time scheduling classes. The effect is statistical and depends on system load; on an idle single-core VM the difference is measurable but modest.
-**Justification:** Nice values are the simplest and most portable way to influence CFS scheduling without requiring `CAP_SYS_NICE` for real-time classes. The 1.5-second difference on a 15-second workload is a clear and reproducible observable effect.
+**Justification:** Nice values are the simplest and most portable way to influence CFS scheduling without requiring `CAP_SYS_NICE` for real-time classes. The 11.692-second difference on a 15-second workload is a clear and reproducible observable effect, reflecting the significant CPU share disparity between nice -5 and nice +10 under resource contention.
 
 ---
 
